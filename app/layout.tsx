@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import DisclaimerModal from "@/app/component/disclaimer-modal";
 import ScrollToTop from "@/app/component/scroll-to-top";
+import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://solvpartners.in"),
@@ -96,9 +97,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
-        <ScrollToTop />
-        <DisclaimerModal />
-        {children}
+        <AuthProvider>
+          <ScrollToTop />
+          <DisclaimerModal />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

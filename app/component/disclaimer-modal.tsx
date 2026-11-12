@@ -100,8 +100,8 @@ export default function DisclaimerModal() {
     }
   };
 
-  // Do not render if not mounted, not open, or user is already viewing the dedicated disclaimer page
-  if (!mounted || !isOpen || pathname === "/disclaimer") return null;
+  // Do not render if not mounted, not open, on dedicated disclaimer page, or inside admin portal
+  if (!mounted || !isOpen || pathname === "/disclaimer" || pathname?.startsWith("/admin")) return null;
 
   return (
     <div

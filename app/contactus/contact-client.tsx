@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Navbar from "@/app/component/nav";
 import Footer from "@/app/component/footer";
 import FAQSection from "@/app/component/faq";
@@ -13,23 +12,8 @@ import {
   MapsLocation01Icon,
   CheckmarkCircle01Icon,
 } from "@hugeicons/core-free-icons";
-import { User, Mail, Phone, ChevronDown } from "lucide-react";
-
-const SERVICE_OPTIONS = [
-  "Arbitration & Mediation",
-  "Consumer Disputes & Protection",
-  "Conveyancing & Wills",
-  "Corporate & Commercial Advisory",
-  "Employment & Labour Service Law",
-  "Family Law & Matrimonial Disputes",
-  "Insolvency & Bankruptcy (IBC) Matters",
-  "Litigation & Dispute Resolution",
-  "Media, Entertainment & IP",
-  "NGO & Non-Profit Advisory",
-  "Public Interest & Constitutional Matters",
-  "Startup Legal Solutions",
-  "Others",
-];
+import { User, Mail, Phone, ChevronDown, AlertCircle } from "lucide-react";
+import { SOLV_SERVICE_OPTIONS } from "@/lib/constants/admin";
 
 export default function ContactClient() {
   const [formData, setFormData] = useState({
@@ -42,13 +26,31 @@ export default function ContactClient() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          services: formData.serviceNeeded ? [formData.serviceNeeded] : [],
+          message: formData.message.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Unable to submit your enquiry. Please try again.");
+      }
+
       setIsSubmitted(true);
       setFormData({
         name: "",
@@ -58,7 +60,13 @@ export default function ContactClient() {
         message: "",
       });
       setTimeout(() => setIsSubmitted(false), 6000);
-    }, 700);
+    } catch (err: unknown) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -305,7 +313,7 @@ export default function ContactClient() {
                         <option value="" disabled className="bg-[#071A2E] text-white/50">
                           Select a service
                         </option>
-                        {SERVICE_OPTIONS.map((service) => (
+                        {SOLV_SERVICE_OPTIONS.map((service) => (
                           <option key={service} value={service} className="bg-[#071A2E] text-white py-1">
                             {service}
                           </option>
@@ -346,6 +354,14 @@ export default function ContactClient() {
                       <span>Submit</span>
                     )}
                   </button>
+
+                  {/* Error Banner */}
+                  {errorMessage && (
+                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs sm:text-sm">
+                      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
 
                   {/* Success Banner */}
                   {isSubmitted && (
