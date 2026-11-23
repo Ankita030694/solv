@@ -72,6 +72,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      { url: "/solv.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/solv.svg",
+    apple: "/solv.svg",
+  },
 };
 
 export default function RootLayout({
@@ -85,6 +92,8 @@ export default function RootLayout({
       className="font-sans h-full antialiased"
     >
       <head>
+        <link rel="icon" href="/solv.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/solv.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
